@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Price Predictor | AI-Powered Valuation</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0f172a;
+            min-height: 100vh;
+            color: #e2e8f0;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border-bottom: 1px solid #334155;
+            padding: 20px 0;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .logo-text {
+            font-size: 20px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .logo-text span {
+            color: #3b82f6;
+        }
+
+        .badge {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
+        .hero h1 {
+            font-size: 42px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 18px;
+            color: #94a3b8;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+            align-items: start;
+        }
+
+        @media (max-width: 900px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 16px;
+            padding: 32px;
+        }
+
+        .card-header {
+            margin-bottom: 24px;
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .card-subtitle {
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            background: #0f172a;
+            color: #fff;
+            font-size: 15px;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        select:hover, input:hover {
+            border-color: #475569;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        select option {
+            background: #1e293b;
+            color: #fff;
+        }
+
+        input::placeholder {
+            color: #475569;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: #fff;
+            box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
+        }
+
+        .btn-secondary {
+            background: #334155;
+            color: #fff;
+        }
+
+        .btn-secondary:hover {
+            background: #475569;
+        }
+
+        .result-card {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border: 1px solid #334155;
+            border-radius: 16px;
+            padding: 40px;
+            text-align: center;
+            display: none;
+        }
+
+        .result-card.show {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-label {
+            font-size: 14px;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .result-price {
+            font-size: 56px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 16px;
+        }
+
+        .result-info {
+            font-size: 14px;
+            color: #94a3b8;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid #334155;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        .error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+            padding: 14px 16px;
+            border-radius: 10px;
+            margin-top: 16px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .error.show {
+            display: block;
+        }
+
+        .success {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: #86efac;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px 20px;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            background: transparent;
+            color: #94a3b8;
+            font-size: 14px;
+            font-weight: 500;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tab:hover {
+            border-color: #475569;
+            color: #fff;
+        }
+
+        .tab.active {
+            background: #3b82f6;
+            border-color: #3b82f6;
+            color: #fff;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-top: 48px;
+        }
+
+        @media (max-width: 768px) {
+            .features {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .feature {
+            text-align: center;
+            padding: 24px;
+        }
+
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            font-size: 24px;
+        }
+
+        .feature-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .feature-desc {
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        .input-icon {
+            position: relative;
+        }
+
+        .input-icon input {
+            padding-left: 40px;
+        }
+
+        .input-icon::before {
+            content: attr(data-icon);
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">🚗</div>
+                <div class="logo-text">Car<span>Value</span>AI</div>
+            </div>
+            <div class="badge">Powered by Machine Learning</div>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="hero">
+            <h1>Get Your Car's Value Instantly</h1>
+            <p>Our AI-powered system analyzes 4,340+ real car listings to give you accurate price predictions in seconds.</p>
+        </div>
+
+        <div class="container">
+            <div class="card">
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab('predict')">Price Prediction</button>
+                    <button class="tab" onclick="switchTab('add')">Add New Data</button>
+                </div>
+
+                <div id="predict-tab" class="tab-content active">
+                    <div class="card-header">
+                        <div class="card-title">Enter Car Details</div>
+                        <div class="card-subtitle">Fill in the information below to get an instant valuation</div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Brand</label>
+                            <select id="brand" onchange="loadModels()">
+                                <option value="">Select Brand</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Model</label>
+                            <select id="model">
+                                <option value="">Select Model</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Year</label>
+                            <input type="number" id="year" placeholder="e.g. 2018" min="1990" max="2025">
+                        </div>
+                        <div class="form-group">
+                            <label>Mileage (km)</label>
+                            <input type="number" id="mileage" placeholder="e.g. 50000" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Fuel Type</label>
+                            <select id="fuel_type">
+                                <option value="">Select Fuel</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Transmission</label>
+                            <select id="transmission">
+                                <option value="">Select Type</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary" onclick="predict()">
+                        Get Valuation
+                    </button>
+
+                    <div id="error" class="error"></div>
+                </div>
+
+                <div id="add-tab" class="tab-content">
+                    <div class="card-header">
+                        <div class="card-title">Add Car to Database</div>
+                        <div class="card-subtitle">Help improve our predictions by adding real car data</div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Brand</label>
+                            <input type="text" id="add-brand" placeholder="e.g. Toyota">
+                        </div>
+                        <div class="form-group">
+                            <label>Model</label>
+                            <input type="text" id="add-model" placeholder="e.g. Camry">
+                        </div>
+                        <div class="form-group">
+                            <label>Year</label>
+                            <input type="number" id="add-year" placeholder="e.g. 2018">
+                        </div>
+                        <div class="form-group">
+                            <label>Mileage (km)</label>
+                            <input type="number" id="add-mileage" placeholder="e.g. 50000">
+                        </div>
+                        <div class="form-group">
+                            <label>Fuel Type</label>
+                            <input type="text" id="add-fuel" placeholder="e.g. Petrol">
+                        </div>
+                        <div class="form-group">
+                            <label>Transmission</label>
+                            <input type="text" id="add-transmission" placeholder="e.g. Automatic">
+                        </div>
+                        <div class="form-group full-width">
+                            <label>Price (USD)</label>
+                            <input type="number" id="add-price" placeholder="e.g. 15000">
+                        </div>
+                    </div>
+
+                    <button class="btn btn-secondary" onclick="addCar()">
+                        Add to Database
+                    </button>
+
+                    <div id="add-message" class="error"></div>
+                </div>
+            </div>
+
+            <div>
+                <div id="result" class="result-card">
+                    <div class="result-label">Estimated Market Value</div>
+                    <div class="result-price" id="predicted-price">$0</div>
+                    <div class="result-info">Based on analysis of similar vehicles in our database</div>
+
+                    <div class="stats">
+                        <div class="stat">
+                            <div class="stat-value">4,340+</div>
+                            <div class="stat-label">Cars Analyzed</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">29</div>
+                            <div class="stat-label">Brands</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">70%</div>
+                            <div class="stat-label">Accuracy</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="features">
+                    <div class="feature">
+                        <div class="feature-icon">⚡</div>
+                        <div class="feature-title">Instant Results</div>
+                        <div class="feature-desc">Get valuations in under 1 second</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">🎯</div>
+                        <div class="feature-title">AI-Powered</div>
+                        <div class="feature-desc">Random Forest algorithm</div>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">📊</div>
+                        <div class="feature-title">Real Data</div>
+                        <div class="feature-desc">Based on actual listings</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const API_URL = 'https://adipopectic-heraldically-ethelyn.ngrok-free.dev/api';
+
+        async function loadOptions() {
+            try {
+                const res = await axios.get(`${API_URL}/options`);
+                const { brands, fuel_types, transmissions } = res.data;
+
+                const brandSelect = document.getElementById('brand');
+                brands.sort().forEach(b => {
+                    brandSelect.innerHTML += `<option value="${b}">${b}</option>`;
+                });
+
+                const fuelSelect = document.getElementById('fuel_type');
+                fuel_types.forEach(f => {
+                    fuelSelect.innerHTML += `<option value="${f}">${f}</option>`;
+                });
+
+                const transSelect = document.getElementById('transmission');
+                transmissions.forEach(t => {
+                    transSelect.innerHTML += `<option value="${t}">${t}</option>`;
+                });
+            } catch (err) {
+                showError('Cannot connect to server. Make sure the backend is running.');
+            }
+        }
+
+        async function loadModels() {
+            const brand = document.getElementById('brand').value;
+            const modelSelect = document.getElementById('model');
+            modelSelect.innerHTML = '<option value="">Select Model</option>';
+
+            if (!brand) return;
+
+            try {
+                const res = await axios.get(`${API_URL}/models/${brand}`);
+                res.data.models.sort().forEach(m => {
+                    modelSelect.innerHTML += `<option value="${m}">${m}</option>`;
+                });
+            } catch (err) {
+                showError('Failed to load models');
+            }
+        }
+
+        async function predict() {
+            hideError();
+            const data = {
+                brand: document.getElementById('brand').value,
+                model: document.getElementById('model').value,
+                year: document.getElementById('year').value,
+                mileage: document.getElementById('mileage').value,
+                fuel_type: document.getElementById('fuel_type').value,
+                transmission: document.getElementById('transmission').value
+            };
+
+            if (!data.brand || !data.model || !data.year || !data.mileage || !data.fuel_type || !data.transmission) {
+                showError('Please fill in all fields');
+                return;
+            }
+
+            try {
+                const res = await axios.post(`${API_URL}/predict`, data);
+                const price = res.data.predicted_price;
+                document.getElementById('predicted-price').textContent = `$${Math.round(price).toLocaleString()}`;
+                document.getElementById('result').classList.add('show');
+            } catch (err) {
+                showError(err.response?.data?.error || 'Prediction failed');
+            }
+        }
+
+        async function addCar() {
+            const msgEl = document.getElementById('add-message');
+            msgEl.classList.remove('show', 'success');
+
+            const data = {
+                brand: document.getElementById('add-brand').value,
+                model: document.getElementById('add-model').value,
+                year: document.getElementById('add-year').value,
+                mileage: document.getElementById('add-mileage').value,
+                fuel_type: document.getElementById('add-fuel').value,
+                transmission: document.getElementById('add-transmission').value,
+                price: document.getElementById('add-price').value
+            };
+
+            if (!data.brand || !data.model || !data.year || !data.mileage || !data.fuel_type || !data.transmission || !data.price) {
+                msgEl.textContent = 'Please fill in all fields';
+                msgEl.classList.add('show');
+                return;
+            }
+
+            try {
+                const res = await axios.post(`${API_URL}/add`, data);
+                msgEl.textContent = `Car added successfully! Total cars in database: ${res.data.total_cars}`;
+                msgEl.classList.add('show', 'success');
+
+                ['add-brand', 'add-model', 'add-year', 'add-mileage', 'add-fuel', 'add-transmission', 'add-price'].forEach(id => {
+                    document.getElementById(id).value = '';
+                });
+            } catch (err) {
+                msgEl.textContent = err.response?.data?.error || 'Failed to add car';
+                msgEl.classList.add('show');
+            }
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+
+            event.target.classList.add('active');
+            document.getElementById(`${tab}-tab`).classList.add('active');
+        }
+
+        function showError(msg) {
+            const el = document.getElementById('error');
+            el.textContent = msg;
+            el.classList.add('show');
+        }
+
+        function hideError() {
+            document.getElementById('error').classList.remove('show');
+        }
+
+        loadOptions();
+    </script>
+</body>
+</html>
